@@ -12,6 +12,11 @@ export const createCardElement = (cardData, currentUserId, handlers) => {
   const likeButton = cardElement.querySelector(".card__like-button");
   const likeCountEl = cardElement.querySelector(".card__like-count");
   const deleteButton = cardElement.querySelector(".card__control-button_type_delete");
+  const infoButton = cardElement.querySelector(".card__control-button_type_info");
+
+  infoButton.addEventListener("click", () => {
+    handlers.handleInfoClick(cardData._id);
+  });
 
   // Fill content
   cardTitle.textContent = cardData.name;

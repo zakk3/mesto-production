@@ -26,6 +26,25 @@ const renderLoading = (button, isLoading, defaultText) => {
   }
 };
 
+const formatDate = (date) =>
+  date.toLocaleDateString("ru-RU", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+const createInfoString = (title, value) => {
+  const template = document.querySelector(
+    "#popup-info-definition-template"
+  ).content;
+
+  const element = template.cloneNode(true);
+  element.querySelector(".popup__info-title").textContent = title;
+  element.querySelector(".popup__info-value").textContent = value;
+
+  return element;
+};
+
 
 
 
@@ -38,6 +57,11 @@ const validationSettings = {
   inputErrorClass: "popup__input_type_error",
   errorClass: "popup__error_visible",
 };
+
+const cardInfoModalWindow = document.querySelector(".popup_type_info");
+const cardInfoModalInfoList = cardInfoModalWindow.querySelector(
+  ".popup__info-list"
+);
 
 // Enable validation on all forms
 enableValidation(validationSettings);
@@ -115,6 +139,59 @@ const handleAvatarFromSubmit = (evt) => {
     });
 };
 
+const handleInfoClick = (cardId) => {
+  getCardList()
+    .then((cards) => {
+      const cardData = cards.find((card) => card._id === cardId);
+
+      cardInfoModalInfoList.innerHTML = "";
+
+      cardInfoModalInfoList.append(
+        createInfoString(
+          "Описание:",
+          cardData.name
+        )
+      );
+
+      cardInfoModalInfoList.append(
+        createInfoString(
+          "Дата создания:",
+          formatDate(new Date(cardData.createdAt))
+        )
+      );
+
+      cardInfoModalInfoList.append(
+        createInfoString(
+          "Владелец:",
+          cardData.owner.name
+        )
+      );
+
+      cardInfoModalInfoList.append(
+        createInfoString("Количество лайков:", cardData.likes.length)
+      );
+
+      // Populate likes list
+      const likesList = cardInfoModalWindow.querySelector(".popup__list");
+      likesList.innerHTML = "";
+
+      cardData.likes.forEach((user) => {
+        const template = document.querySelector(
+          "#popup-info-user-preview-template"
+        ).content;
+        const userElement = template.cloneNode(true);
+        userElement.querySelector(".popup__list-item").textContent = user.name;
+        likesList.append(userElement);
+      });
+
+      openModalWindow(cardInfoModalWindow);
+    })
+    .catch(console.error);
+};
+
+
+
+
 
 
 
@@ -132,6 +209,7 @@ const handleCardFormSubmit = (evt) => {
       placesWrap.prepend(
         createCardElement(newCardData, currentUserId, {
           onPreviewPicture: handlePreviewPicture,
+          handleInfoClick: handleInfoClick,
         })
       );
       closeModalWindow(cardFormModalWindow);
@@ -199,6 +277,7 @@ Promise.all([getUserInfo(), getCardList()])
       placesWrap.append(
         createCardElement(cardData, currentUserId, {
           onPreviewPicture: handlePreviewPicture,
+          handleInfoClick: handleInfoClick,
         })
       );
     });
